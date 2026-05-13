@@ -194,3 +194,69 @@ def section_label(parent, text):
         font=FONT_H, anchor="w",
     ).pack(fill="x", padx=20, pady=(18, 4))
     tk.Frame(parent, bg=BORDER, height=1).pack(fill="x", padx=20)
+
+
+# ─────────────────────────────────────────────
+#  MAIN APP
+# ─────────────────────────────────────────────
+class GameInventoryApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        initialize_file()
+        self.title("GAME VAULT  —  Inventory Manager")
+        self.geometry("1050x680")
+        self.minsize(900, 600)
+        self.configure(bg=BG)
+        self.resizable(True, True)
+
+        self._build_layout()
+        self.refresh_table()
+
+    # ── Layout skeleton ──────────────────────
+    def _build_layout(self):
+        # ── TOP BAR ──
+        topbar = tk.Frame(self, bg=PANEL, height=56)
+        topbar.pack(fill="x")
+        topbar.pack_propagate(False)
+
+        tk.Label(
+            topbar, text="◈  GAME VAULT", bg=PANEL, fg=ACCENT,
+            font=FONT_XL,
+        ).pack(side="left", padx=24, pady=10)
+
+        self.total_var = tk.StringVar(value="Portfolio Value: $0")
+        tk.Label(
+            topbar, textvariable=self.total_var, bg=PANEL, fg=ACCENT2,
+            font=FONT_H,
+        ).pack(side="right", padx=24)
+
+        # ── MAIN BODY (sidebar + content) ──
+        body = tk.Frame(self, bg=BG)
+        body.pack(fill="both", expand=True)
+
+        sidebar = tk.Frame(body, bg=PANEL, width=300)
+        sidebar.pack(side="left", fill="y")
+        sidebar.pack_propagate(False)
+
+        content = tk.Frame(body, bg=BG)
+        content.pack(side="left", fill="both", expand=True, padx=16, pady=16)
+
+        self._build_sidebar(sidebar)
+        self._build_table(content)
+
+          # ── STATUS BAR ──
+        self.status_var = tk.StringVar(value="Ready.")
+        statusbar = tk.Frame(self, bg=CARD, height=28)
+        statusbar.pack(fill="x", side="bottom")
+        statusbar.pack_propagate(False)
+        tk.Label(
+            statusbar, textvariable=self.status_var,
+            bg=CARD, fg=SUBTEXT, font=FONT_SM, anchor="w",
+        ).pack(side="left", padx=12, pady=4)
+
+    # ── Sidebar ──────────────────────────────
+    def _build_sidebar(self, parent):
+        tk.Label(
+            parent, text="OPERATIONS", bg=PANEL, fg=SUBTEXT,
+            font=FONT_SM,
+        ).pack(anchor="w", padx=20, pady=(20, 4))
