@@ -130,3 +130,67 @@ FONT_XL   = ("Courier New", 22, "bold")
 # ─────────────────────────────────────────────
 def styled_entry(parent, placeholder="", width=28):
     frame = tk.Frame(parent, bg=BORDER, padx=1, pady=1)
+e = tk.Entry(
+        frame, width=width, bg=CARD, fg=TEXT,
+        insertbackground=ACCENT, relief="flat",
+        font=FONT_BODY, bd=6,
+        highlightthickness=0,
+    )
+    e.pack()
+
+    def _add_placeholder():
+        if not e.get():
+            e.insert(0, placeholder)
+            e.config(fg=SUBTEXT)
+
+    def _clear_placeholder(event):
+        if e.get() == placeholder:
+            e.delete(0, tk.END)
+            e.config(fg=TEXT)
+
+    def _restore_placeholder(event):
+        if not e.get():
+            e.insert(0, placeholder)
+            e.config(fg=SUBTEXT)
+
+    e.bind("<FocusIn>",  _clear_placeholder)
+    e.bind("<FocusOut>", _restore_placeholder)
+    _add_placeholder()
+
+    # Store placeholder text for later validation
+    e._placeholder = placeholder
+
+    def get_real():
+        val = e.get()
+        return "" if val == placeholder else val
+
+    e.get_real = get_real
+    return frame, e
+
+
+def icon_button(parent, text, command, color=ACCENT, width=18):
+    btn = tk.Button(
+        parent, text=text, command=command,
+        bg=color, fg=TEXT, activebackground=color,
+        activeforeground=TEXT, font=FONT_H,
+        relief="flat", bd=0, padx=14, pady=8,
+        cursor="hand2", width=width,
+    )
+    # Hover effect
+    btn.bind("<Enter>", lambda e: btn.config(bg=_lighten(color)))
+    btn.bind("<Leave>", lambda e: btn.config(bg=color))
+    return btn
+
+def _lighten(hex_color):
+    """Return a slightly lighter shade."""
+    h = hex_color.lstrip("#")
+    rgb = tuple(min(255, int(h[i:i+2], 16) + 30) for i in (0, 2, 4))
+    return "#{:02x}{:02x}{:02x}".format(*rgb)
+
+
+def section_label(parent, text):
+    tk.Label(
+        parent, text=text, bg=PANEL, fg=ACCENT,
+        font=FONT_H, anchor="w",
+    ).pack(fill="x", padx=20, pady=(18, 4))
+    tk.Frame(parent, bg=BORDER, height=1).pack(fill="x", padx=20)
