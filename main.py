@@ -395,3 +395,68 @@ style.map("Vault.Treeview", background=[("selected", ACCENT)])
         )
         if not confirm:
             return
+ok, msg = delete_game_logic(name)
+        color = ACCENT2 if ok else DANGER
+        icon  = "✔" if ok else "✖"
+        self._status(f"{icon}  {msg}  [{name}]", color)
+        self.refresh_table()
+
+    def refresh_table(self):
+        for row in self.tree.get_children():
+            self.tree.delete(row)
+
+        games = get_all_games()
+        for i, line in enumerate(games):
+            parsed = parse_game_line(line)
+            if not parsed:
+                continue
+            name, price, qty = parsed
+            stock_val = int(price) * int(qty)
+            tag = "even" if i % 2 == 0 else "odd"
+            qty_tag = "low" if int(qty) == 0 else ("good" if int(qty) >= 5 else tag)
+            self.tree.insert(
+                "", "end",
+                values=(i + 1, name, f"{price}", qty, f"{stock_val}"),
+                tags=(qty_tag,),
+            )
+
+        total = calculate_total_logic()
+        self.total_var.set(f"Portfolio Value: ${total:,}")
+
+    def _on_row_click(self, event):
+        """Auto-fill sell field when a row is clicked."""
+        sel = self.tree.selection()
+        if not sel:
+            return
+        values = self.tree.item(sel[0], "values")
+        if values:
+            name = values[1]
+            self.e_sell.config(fg=TEXT)
+            self.e_sell.delete(0, tk.END)
+            self.e_sell.insert(0, name)
+
+    def _clear_add_fields(self):
+        for entry, ph in [
+            (self.e_name,  "Game name…"),
+            (self.e_price, "Price (integer)…"),
+            (self.e_qty,   "Quantity…"),
+        ]:
+            entry.delete(0, tk.END)
+            entry.insert(0, ph)
+            entry.config(fg=SUBTEXT)
+
+    def _status(self, msg, color=SUBTEXT):
+        self.status_var.set(msg)
+        # Find the status label and update its color
+        for widget in self.winfo_children():
+            if isinstance(widget, tk.Frame):
+                for child in widget.winfo_children():
+                    if isinstance(child, tk.Label) and child.cget("textvariable") == str(self.status_var):
+                        child.config(fg=color)
+                        break
+
+
+# ─────────────────────────────────────────────
+if __name__ == "__main__":
+    app = GameInventoryApp()
+    app.mainloop()
