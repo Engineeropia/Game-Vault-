@@ -260,3 +260,70 @@ class GameInventoryApp(tk.Tk):
             parent, text="OPERATIONS", bg=PANEL, fg=SUBTEXT,
             font=FONT_SM,
         ).pack(anchor="w", padx=20, pady=(20, 4))
+# ── ADD GAME ──
+        section_label(parent, "▸  ADD GAME")
+
+        frm_name, self.e_name = styled_entry(parent, "Game name…")
+        frm_name.pack(padx=20, pady=4, fill="x")
+
+        frm_price, self.e_price = styled_entry(parent, "Price (integer)…")
+        frm_price.pack(padx=20, pady=4, fill="x")
+
+        frm_qty, self.e_qty = styled_entry(parent, "Quantity…")
+        frm_qty.pack(padx=20, pady=4, fill="x")
+
+        icon_button(parent, "＋  Add to Vault", self.add_game, color=ACCENT, width=24).pack(
+            padx=20, pady=(8, 4), fill="x"
+        )
+
+        # ── SELL GAME ──
+        section_label(parent, "▸  SELL GAME")
+
+        frm_sell, self.e_sell = styled_entry(parent, "Game name to sell…")
+        frm_sell.pack(padx=20, pady=4, fill="x")
+
+        icon_button(parent, "⟳  Sell One Copy", self.sell_game, color="#e76f51", width=24).pack(
+            padx=20, pady=(8, 4), fill="x"
+        )
+
+        # ── DELETE GAME ──
+        section_label(parent, "▸  DELETE GAME")
+
+        frm_del, self.e_del = styled_entry(parent, "Game name to delete…")
+        frm_del.pack(padx=20, pady=4, fill="x")
+
+        icon_button(parent, "✕  Remove from Vault", self.delete_game, color=DANGER, width=24).pack(
+            padx=20, pady=(8, 4), fill="x"
+        )
+
+        # ── REFRESH ──
+        tk.Frame(parent, bg=BORDER, height=1).pack(fill="x", padx=20, pady=16)
+        icon_button(parent, "↻  Refresh Table", self.refresh_table, color="#333346", width=24).pack(
+            padx=20, fill="x"
+        )
+
+    # ── Table ─────────────────────────────────
+    def _build_table(self, parent):
+        tk.Label(
+            parent, text="INVENTORY", bg=BG, fg=SUBTEXT,
+            font=FONT_SM, anchor="w",
+        ).pack(fill="x")
+
+        tk.Frame(parent, bg=ACCENT, height=2).pack(fill="x", pady=(2, 10))
+
+        # Scrollable treeview
+        table_frame = tk.Frame(parent, bg=CARD, bd=0, relief="flat")
+        table_frame.pack(fill="both", expand=True)
+
+        style = ttk.Style()
+        style.configure(
+            "Vault.Treeview",
+            background=CARD, fieldbackground=CARD,
+            foreground=TEXT, rowheight=36,
+            font=FONT_BODY, borderwidth=0,
+        )
+        style.configure(
+            "Vault.Treeview.Heading",
+            background=PANEL, foreground=ACCENT,
+            font=FONT_H, relief="flat", borderwidth=0,
+        )
