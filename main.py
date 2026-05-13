@@ -327,3 +327,71 @@ class GameInventoryApp(tk.Tk):
             background=PANEL, foreground=ACCENT,
             font=FONT_H, relief="flat", borderwidth=0,
         )
+style.map("Vault.Treeview", background=[("selected", ACCENT)])
+
+        cols = ("#", "Name", "Price ($)", "Quantity", "Stock Value ($)")
+        self.tree = ttk.Treeview(
+            table_frame, columns=cols, show="headings",
+            style="Vault.Treeview", selectmode="browse",
+        )
+
+        col_widths = [40, 280, 110, 100, 140]
+        for col, w in zip(cols, col_widths):
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=w, anchor="center" if col != "Name" else "w", minwidth=40)
+
+        self.tree.column("Name", anchor="w")
+
+        # Alternating row tags
+        self.tree.tag_configure("even", background=CARD)
+        self.tree.tag_configure("odd",  background="#1a1a22")
+        self.tree.tag_configure("low",  foreground=DANGER)
+        self.tree.tag_configure("good", foreground=ACCENT2)
+
+        scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+
+        self.tree.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # Click-to-fill sell field
+        self.tree.bind("<ButtonRelease-1>", self._on_row_click)
+
+    # ── Handlers ─────────────────────────────
+    def add_game(self):
+        name  = self.e_name.get_real().strip()
+        price = self.e_price.get_real().strip()
+        qty   = self.e_qty.get_real().strip()
+
+        if not name:
+            return self._status("⚠  Game name is required.", DANGER)
+        if not price.isdigit():
+            return self._status("⚠  Price must be a whole number.", DANGER)
+        if not qty.isdigit():
+            return self._status("⚠  Quantity must be a whole number.", DANGER)
+
+        add_game_logic(name, int(price), int(qty))
+        self._clear_add_fields()
+        self.refresh_table()
+        self._status(f"✔  '{name}' added to vault.", ACCENT2)
+
+    def sell_game(self):
+        name = self.e_sell.get_real().strip()
+        if not name:
+            return self._status("⚠  Enter a game name to sell.", DANGER)
+        ok, msg = sell_game_logic(name)
+        color = ACCENT2 if ok else DANGER
+        icon  = "✔" if ok else "✖"
+        self._status(f"{icon}  {msg}  [{name}]", color)
+        self.refresh_table()
+
+    def delete_game(self):
+        name = self.e_del.get_real().strip()
+        if not name:
+            return self._status("⚠  Enter a game name to delete.", DANGER)
+        confirm = messagebox.askyesno(
+            "Confirm Delete",
+            f"Permanently remove '{name}' from the vault?",
+        )
+        if not confirm:
+            return
